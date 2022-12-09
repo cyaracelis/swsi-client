@@ -1,13 +1,15 @@
 <template>
   <v-toolbar elevation="4" color="#000080">
     <v-toolbar-title>
-      <v-btn icon color="#FFFFFF"> <v-icon> mdi-home </v-icon> </v-btn>
+      <v-btn icon color="#FFFFFF" @click="home">
+        <img src="~/assets/img/swsi_logo.png" class="logo" />
+      </v-btn>
       Sinukuan Water System Inc.
     </v-toolbar-title>
     <v-spacer></v-spacer>
     <v-menu left bottom>
       <template #activator="{ on, attrs }">
-        <v-btn icon v-bind="attrs" v-on="on">
+        <v-btn icon v-bind="attrs" v-on="on" @click="about">
           <v-icon color="#FFFFFF"> mdi-menu </v-icon>
         </v-btn>
       </template>
@@ -23,7 +25,16 @@
 
 <script lang="ts">
 import Vue from 'vue'
-export default Vue.extend({})
+export default Vue.extend({
+  methods: {
+    home() {
+      this.$router.push('/')
+    },
+    about() {
+      this.$router.push('/about')
+    },
+  },
+})
 </script>
 
 <style lang="postcss" scoped>
@@ -36,5 +47,10 @@ export default Vue.extend({})
   font-family: 'Imprima', 'sans-serif';
   font-weight: 400;
   color: white;
+}
+
+.logo {
+  width: 65px;
+  height: 50px;
 }
 </style>

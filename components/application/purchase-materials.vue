@@ -1,7 +1,9 @@
 <template>
   <div class="container">
     <div class="welcome">
-      <p><strong>Your application number is 2211061.</strong></p>
+      <p>
+        <strong>Your application number is {{ appNum }}.</strong>
+      </p>
     </div>
 
     <!-- Stepper temp -->
@@ -10,18 +12,28 @@
 
     <!-- Purchase of Materials -->
     <div class="panel">
-      <div class="heading">Purchase of Materials</div>
-
       <!-- Materials -->
-      <div class="materials">
-        <ol class="list-of-materials">
-          <material-item v-for="m in materials" :key="m.name" :name="m.name" />
-        </ol>
-      </div>
+      <v-container>
+        <v-row><div class="heading">Purchase of Materials</div></v-row>
+        <v-row><h1></h1></v-row>
+
+        <v-row>
+          <v-spacer /><img src="~/assets/img/mats_1.png" class="mats" />
+          <v-spacer
+        /></v-row>
+        <v-row>
+          <v-spacer /><img src="~/assets/img/mats_2.png" class="mats" />
+          <v-spacer
+        /></v-row>
+        <v-row>
+          <v-spacer /><img src="~/assets/img/mats_3.png" class="mats" />
+          <v-spacer
+        /></v-row>
+      </v-container>
 
       <!-- Go to Next Step -->
       <div class="center-btn">
-        <button class="btn" @click="nextStep()">Go to Next Step</button>
+        <button class="btn" @click="onClick()">Go to Next Step</button>
       </div>
     </div>
   </div>
@@ -30,14 +42,34 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
-  data() {
-    return {
-      materials: [{ name: 'Material1' }, { name: 'Material2' }],
-    }
+  props: {
+    appNum: {
+      type: Number,
+      required: true,
+    },
   },
+
   methods: {
     nextStep() {
       this.$emit('onsite-signing')
+    },
+
+    async onClick() {
+      const appNumUnknown = this.appNum as unknown
+      const appNumString = appNumUnknown as string
+
+      const url =
+        'https://3498-180-190-48-16.ap.ngrok.io/applications/step6/' +
+        appNumString
+
+      try {
+        const res = await this.$axios.post(url)
+        const resData = res.data
+        console.log(resData)
+        this.nextStep()
+      } catch (err: any) {
+        console.log(err)
+      }
     },
   },
 })
@@ -54,7 +86,7 @@ export default Vue.extend({
   position: absolute;
   font-family: 'Inter';
   margin-top: 8%;
-  margin-left: 20%;
+  margin-left: 23%;
   font-style: normal;
   font-weight: 700;
   font-size: 250%;
@@ -88,6 +120,13 @@ export default Vue.extend({
   font-size: 160%;
   padding-top: 5%;
   padding-left: 5%;
+  padding-bottom: 2%;
+}
+
+.mats {
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Center button */
@@ -98,6 +137,8 @@ export default Vue.extend({
   border-radius: 10px;
   padding: 1% 5% 1% 5%;
   font-size: 140%;
+  font-family: 'Inter';
+  font-weight: 800;
 }
 
 .center-btn {

@@ -11,13 +11,16 @@
         New Application
       </button>
       <input
-        id="application-num"
-        type="text"
+        id="appNum"
+        v-model="appNum"
+        type="number"
         name="application-num"
         class="application-num"
         placeholder="Application Number"
       />
-      <button class="continue-btn">Continue</button>
+      <button class="continue-btn" @click="continueApplication()">
+        Continue
+      </button>
     </div>
   </div>
 </template>
@@ -25,9 +28,73 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
+  data() {
+    return {
+      appNum: 0,
+    }
+  },
   methods: {
     newApplication() {
       this.$emit('customer-info')
+    },
+    async continueApplication() {
+      const appNumUnknown = this.appNum as unknown
+      const appNumString = appNumUnknown as string
+
+      const url =
+        'https://3498-180-190-48-16.ap.ngrok.io/applications/' + appNumString
+
+      console.log(url)
+
+      // const options = {
+      //   headers: { 'content-type': 'application/json' },
+      // }
+      try {
+        const res = await this.$axios.post(url)
+
+        const resData = res.data
+        console.log(resData)
+
+        const stage = resData.applicationStage
+        console.log(stage)
+
+        this.$emit('set-app-num', this.appNum)
+
+        // STEP 2
+        if (stage === 'Uploading Requirements') {
+          this.$emit('upload-reqs')
+          // STEP 2A
+        } else if (stage === 'Adding Representative') {
+          this.$emit('rep-info')
+
+          // STEP 3
+        } else if (stage === 'Printing and Preparing Documents') {
+          this.$emit('print-forms')
+          // STEP 4
+        } else if (stage === 'Pending Surveyor Visit') {
+          this.$emit('schedule-visit')
+        } else if (stage === 'Waiting for Survey Schedule') {
+          this.$emit('schedule-visit')
+        } // STEP 5
+        else if (stage === 'Purchasing of Materials') {
+          this.$emit('purchase-materials')
+        }
+
+        // STEP 6
+        else if (stage === 'Pending Onsite Visit') {
+          this.$emit('onsite-signing')
+
+          // STEP 7
+        } else if (stage === 'Pending Installation') {
+          this.$emit('installation-activation')
+        } else if (stage === 'Completed') {
+          this.$emit('installation-activation')
+        } else {
+          console.log('Error')
+        }
+      } catch (err: any) {
+        console.log(err)
+      }
     },
   },
 })
