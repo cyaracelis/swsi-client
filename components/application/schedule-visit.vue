@@ -2,7 +2,9 @@
   <!-- New application text -->
   <div class="container">
     <div class="welcome">
-      <p><strong>Your application number is 2211061.</strong></p>
+      <p>
+        <strong>Your application number is {{ appNum }}.</strong>
+      </p>
     </div>
 
     <!-- Stepper temp -->
@@ -15,16 +17,17 @@
           <img src="~/assets/img/calendar.png" class="schedule-icon" />
         </div>
         <div class="right">
-          <div class="schedule-header"><b>Waiting for schedule</b></div>
+          <div class="schedule-header">
+            <b>{{ displayHeading }}</b>
+          </div>
           <div class="schedule-sub">
-            The staff have not yet set a schedule for their visit to your
-            location. Please wait for an email notification from us!
+            {{ displaySub }}
           </div>
         </div>
       </div>
 
       <div class="gray-btn-center">
-        <button class="gray-btn" @click="nextStep()">
+        <button class="gray-btn">
           Please wait for further instructions. <br />Thank you!
         </button>
       </div>
@@ -35,9 +38,66 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
+  props: {
+    appNum: {
+      type: Number,
+      required: true,
+    },
+  },
+
+  data() {
+    return {
+      displayHeading: '',
+      displaySub: '',
+      visitationSchedule: '0000',
+    }
+  },
+  mounted() {
+    this.getStatus()
+  },
   methods: {
     nextStep() {
       this.$emit('purchase-materials')
+    },
+
+    async getVisit() {
+      const appNumUnknown = this.appNum as unknown
+      const appNumString = appNumUnknown as string
+
+      const url =
+        'https://3498-180-190-48-16.ap.ngrok.io/applications/step4/' +
+        appNumString
+
+      const response = await this.$axios.post(url)
+      const resData = response.data
+      const schedule = resData.visitationSchedule as string
+      console.log(schedule)
+      this.visitationSchedule = schedule
+    },
+
+    async getStatus() {
+      const appNumUnknown = this.appNum as unknown
+      const appNumString = appNumUnknown as string
+
+      const url =
+        'https://3498-180-190-48-16.ap.ngrok.io/applications/' + appNumString
+
+      const response = await this.$axios.post(url)
+      const resData = response.data
+      const status = resData.applicationStage
+      console.log(status)
+
+      if (status === 'Waiting for Survey Schedule') {
+        this.displayHeading = 'Waiting for schedule'
+        this.displaySub =
+          'The staff have not yet set a schedule for their visit to your location. Please wait for an email notification from us!'
+      } else if (status === 'Pending Surveyor Visit') {
+        await this.getVisit()
+        this.displayHeading =
+          'Your visit is scheduled on ' + this.visitationSchedule
+        this.displaySub =
+          'We’re on our way! Please make sure to take note of the visitation schedule.'
+      }
     },
   },
 })
@@ -102,7 +162,7 @@ export default Vue.extend({
   position: absolute;
   font-family: 'Inter';
   margin-top: 8%;
-  margin-left: 20%;
+  margin-left: 23%;
   font-style: normal;
   font-weight: 700;
   font-size: 250%;

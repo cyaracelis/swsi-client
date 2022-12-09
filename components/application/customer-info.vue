@@ -21,9 +21,9 @@
         @submit.prevent="onSubmit()"
       >
         <v-container>
-          <v-row><v-subheading> </v-subheading></v-row>
-          <v-row> <v-title> Customer Information </v-title></v-row>
-          <v-row> <v-title> </v-title></v-row>
+          <v-row></v-row>
+          <v-row> <h3 class="h3">Customer Information</h3></v-row>
+          <v-row> <h3></h3></v-row>
 
           <!-- FIRST ROW -- Names -->
           <v-layout>
@@ -32,6 +32,7 @@
               <v-text-field
                 v-model="user.firstName"
                 :rules="nameRules"
+                class="form-input"
                 :counter="15"
                 label="First name"
                 required
@@ -42,7 +43,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="user.middleName"
-                class="mx-2"
+                class="form-input mx-2"
                 :rules="nameRules"
                 :counter="15"
                 label="Middle name"
@@ -54,6 +55,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="user.lastName"
+                class="form-input"
                 :counter="15"
                 :rules="nameRules"
                 label="Last name"
@@ -69,7 +71,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="user.email"
-                class="ml-5"
+                class="form-input ml-5"
                 :rules="emailRules"
                 label="Email"
                 required
@@ -80,7 +82,7 @@
             <v-flex xs12 md7>
               <v-text-field
                 v-model="user.establishmentName"
-                class="mr-5"
+                class="form-input text-mr"
                 :rules="optionalRules"
                 label="(Optional) If commercial, Official Name of Establishment"
               ></v-text-field>
@@ -94,7 +96,7 @@
             <v-flex xs1 md3>
               <v-text-field
                 v-model="user.contactNo"
-                class="ml-5"
+                class="form-input ml-5"
                 :rules="numberRules"
                 label="Contact number"
                 required
@@ -105,7 +107,7 @@
             <v-flex xs1 md7>
               <v-text-field
                 v-model="user.address"
-                class="mr-5"
+                class="form-input mr-5"
                 :rules="nameRules"
                 label="Address"
                 required
@@ -117,22 +119,22 @@
           <!--FOURTH ROW -- CONTACT 3 -->
           <v-layout>
             <v-spacer />
-            <v-flex xs1 md11>
+            <v-flex xs5 md10>
               <v-text-field
                 v-model="user.landmark"
-                class="ml-5"
+                class="form-input ml-5"
                 :rules="optionalRules"
                 label="Landmarks and/or remarks"
               ></v-text-field>
             </v-flex>
             <v-spacer />
+            <v-spacer />
           </v-layout>
         </v-container>
 
         <v-container>
-          <v-row><v-subheading> </v-subheading></v-row>
-          <v-row> <v-title> Reference Account </v-title></v-row>
-          <v-row> <v-title> </v-title></v-row>
+          <v-row> <h3 class="h3">Reference Account</h3></v-row>
+          <v-row> <h3></h3></v-row>
 
           <!-- FIRST ROW -- Names -->
           <v-layout>
@@ -141,6 +143,7 @@
               <v-text-field
                 v-model="user.refFirstName"
                 :rules="nameRules"
+                class="form-input"
                 :counter="15"
                 label="First name"
                 required
@@ -151,7 +154,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="user.refMiddleName"
-                class="mx-2"
+                class="form-input mx-2"
                 :rules="nameRules"
                 :counter="15"
                 label="Middle name"
@@ -163,6 +166,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="user.refLastName"
+                class="form-input"
                 :counter="15"
                 :rules="nameRules"
                 label="Last name"
@@ -178,9 +182,9 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="user.refClientNo"
-                class="ml-5"
+                class="form-input ml-5"
                 :rules="numberRules"
-                label="Client Number"
+                label="Account Number"
                 required
               ></v-text-field>
             </v-flex>
@@ -189,7 +193,7 @@
             <v-flex xs12 md7>
               <v-text-field
                 v-model="user.refAddress"
-                class="mr-5"
+                class="form-input mr-5"
                 :rules="nameRules"
                 label="Reference Address"
                 required
@@ -239,6 +243,7 @@ export default Vue.extend({
         (v) => !!v || 'E-mail is required',
         (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
       ],
+      appNum: 0,
     }
   },
 
@@ -253,8 +258,8 @@ export default Vue.extend({
           headers: { 'content-type': 'application/json' },
         }
 
-        await this.$axios.post(
-          'http://localhost:3000/applications/step1',
+        const res = await this.$axios.post(
+          'https://3498-180-190-48-16.ap.ngrok.io/applications/step1',
           {
             firstName: this.user.firstName,
             middleName: this.user.middleName,
@@ -273,10 +278,16 @@ export default Vue.extend({
           },
           options
         )
+
+        const responseData = res.data
+        const appNum: Number = responseData.applicationNo
+        console.log(appNum)
+        this.$set(this, 'appNum', appNum)
+        this.$emit('set-app-num', appNum)
+        this.nextPage()
       } catch (err: any) {
         console.log(err)
       }
-      this.nextPage()
     },
   },
 })
@@ -335,6 +346,10 @@ export default Vue.extend({
   padding-top: 5%;
 }
 
+.h3 {
+  font-weight: 400;
+}
+
 /* Center button */
 .btn {
   background: #000080;
@@ -363,17 +378,7 @@ export default Vue.extend({
   padding-right: 2%;
 }
 
-.form-input >>> .v-input__slot::after {
-  border-color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.form-input >>> .v-input__slot::before {
-  border-color: rgba(255, 255, 255, 0.7) !important;
-}
 .form-input >>> .error--text {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-.form-input >>> input {
-  caret-color: white !important;
+  color: rgba(255, 0, 0, 1) !important;
 }
 </style>

@@ -1,7 +1,9 @@
 <template>
   <div class="container">
     <div class="welcome">
-      <p>Welcome, New Subscriber!</p>
+      <p>
+        <strong>Your application number is {{ appNum }}.</strong>
+      </p>
     </div>
 
     <!-- Stepper temp -->
@@ -21,9 +23,13 @@
           <div class="upload-id">
             <form @submit.prevent>
               <v-file-input
-                model="this.userId"
+                ref="userId"
+                v-model="file"
+                class="form-input"
                 chips
+                :rules="fileRules"
                 label="Upload .jpg, .png, or .pdf of your ID"
+                required
               ></v-file-input>
             </form>
           </div>
@@ -34,7 +40,7 @@
             signing of contract and submission of requirements.
           </li>
           <div class="checkbox">
-            <input id="rep" v-model="rep" type="checkbox" name="rep" />
+            <input id="rep" v-model="rep" type="checkbox" name="rep" required />
             <label for="rep">Yes, I will be needing a representative.</label>
           </div>
         </ol>
@@ -42,7 +48,7 @@
 
       <!-- Go to Next Step -->
       <div class="center-btn">
-        <button class="btn" @click="handleRequirements">Go to Next Step</button>
+        <button class="btn" @click="upload">Go to Next Step</button>
       </div>
     </div>
   </div>
@@ -51,9 +57,22 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
+  props: {
+    appNum: {
+      type: Number,
+      required: true,
+    },
+  },
+
   data() {
     return {
       rep: false,
+      file: null,
+      fileRules: [
+        (v) => !!v || 'File is required',
+        (v) => (v && v.size > 0) || 'File is required',
+        (v) => (v && v.size < 5242880) || 'File must be below 5MB.',
+      ],
     }
   },
   methods: {
@@ -65,22 +84,38 @@ export default Vue.extend({
       }
     },
 
-    async upload(ev: Event) {
-      const files = (ev.target as HTMLInputElement).files
-      if (!files) {
-        return
-      }
+    async upload() {
+      if (this.file) {
+        // const options = {
+        //   headers: { 'Content-Type': 'multipart/form-data' },
+        // }
 
-      const file = files[0]
-      const fd = new FormData()
-      fd.append('file', file, file.name)
+        const fd = new FormData()
+        fd.append('validId', this.file)
+        console.log(this.file)
+        console.log(this.file.name)
+        fd.append('hasRepresentative', 'true')
 
-      try {
-        await this.$axios.post('http://localhost:3000/applications/step2', fd)
-      } catch (_err) {
-        console.log('POST error')
+        const appNumUnknown = this.appNum as unknown
+        const appNumString = appNumUnknown as string
+
+        const url =
+          'https://3498-180-190-48-16.ap.ngrok.io/applications/step2/' +
+          appNumString
+
+        console.log(url)
+
+        try {
+          await this.$axios.patch(url, fd)
+        } catch (_err) {
+          console.log('Error.')
+          console.log(this.file)
+          console.log(_err)
+        }
+        this.handleRequirements()
+      } else {
+        console.log('No file.')
       }
-      this.handleRequirements()
     },
   },
 })
@@ -98,11 +133,10 @@ export default Vue.extend({
   position: absolute;
   font-family: 'Inter';
   margin-top: 8%;
-  margin-left: 27%;
+  margin-left: 23%;
   font-style: normal;
   font-weight: 700;
   font-size: 250%;
-  align: center;
   color: #000080;
 }
 
@@ -190,5 +224,9 @@ li {
 /* Representative  checkbox */
 .checkbox {
   padding-left: 2%;
+}
+
+.form-input >>> .error--text {
+  color: rgba(255, 0, 0, 1) !important;
 }
 </style>

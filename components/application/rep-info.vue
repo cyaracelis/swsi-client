@@ -2,7 +2,7 @@
   <div class="container">
     <!-- New application text -->
     <div class="welcome">
-      <p>Welcome, New Subscriber!</p>
+      <p>Your application number is {{ appNum }}.</p>
     </div>
 
     <!-- Stepper temp -->
@@ -20,9 +20,8 @@
         @submit.prevent="onSubmit()"
       >
         <v-container>
-          <v-row><v-subheading> </v-subheading></v-row>
-          <v-row> <v-title> Customer Information </v-title></v-row>
-          <v-row> <v-title> </v-title></v-row>
+          <v-row> <h3 class="h3">Customer Information</h3></v-row>
+          <v-row> <h3></h3></v-row>
 
           <!-- FIRST ROW -- Names -->
           <v-layout>
@@ -30,6 +29,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="rep.firstName"
+                class="form-input"
                 :rules="nameRules"
                 :counter="15"
                 label="First name"
@@ -41,7 +41,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="rep.middleName"
-                class="mx-2"
+                class="form-input mx-2"
                 :rules="nameRules"
                 :counter="15"
                 label="Middle name"
@@ -53,6 +53,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="rep.lastName"
+                class="form-input"
                 :counter="15"
                 :rules="nameRules"
                 label="Last name"
@@ -68,10 +69,8 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="rep.email"
-                class="ml-5"
-                :rules="emailRules"
+                class="form-input ml-5"
                 label="Email"
-                required
               ></v-text-field>
             </v-flex>
             <v-spacer />
@@ -79,7 +78,7 @@
             <v-flex xs1 md3>
               <v-text-field
                 v-model="rep.contactNo"
-                class="ml-5"
+                class="form-input ml-5"
                 :rules="numberRules"
                 label="Contact number"
                 required
@@ -90,6 +89,7 @@
             <v-flex xs12 md3>
               <v-text-field
                 v-model="rep.relationship"
+                class="form-input"
                 :counter="15"
                 :rules="nameRules"
                 label="Relationship"
@@ -105,9 +105,13 @@
           <v-flex xs12 md11>
             <form @submit.prevent>
               <v-file-input
+                v-model="file"
+                class="form-input"
                 model="this.userId"
+                :rules="fileRules"
                 chips
-                label="Upload .jpg, .png, or .pdf of representative's ID with signature"
+                required
+                label="Upload .jpg, .png, or .pdf of representative's ID with signature (max 5MB)."
               ></v-file-input>
             </form>
           </v-flex>
@@ -119,7 +123,7 @@
             input
             type="submit"
             value="Submit"
-            @click="nextStep"
+            @click="onSubmit"
           >
             Submit Representative Info
           </button>
@@ -132,6 +136,12 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
+  props: {
+    appNum: {
+      type: Number,
+      required: true,
+    },
+  },
   data() {
     return {
       rep: {
@@ -149,9 +159,11 @@ export default Vue.extend({
         (v) => !!v || 'This field is required',
         (v) => Number.isInteger(Number(v)) || 'Please input a number',
       ],
-      emailRules: [
-        (v) => !!v || 'E-mail is required',
-        (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+      file: null,
+      fileRules: [
+        (v) => !!v || 'File is required',
+        (v) => (v && v.size > 0) || 'File is required',
+        (v) => (v && v.size < 5242880) || 'File must be below 5MB.',
       ],
     }
   },
@@ -160,7 +172,40 @@ export default Vue.extend({
       this.$emit('print-forms')
     },
 
-    async onSubmit() {},
+    async onSubmit() {
+      const appNumUnknown = this.appNum as unknown
+      const appNumString = appNumUnknown as string
+
+      const url =
+        'https://3498-180-190-48-16.ap.ngrok.io/applications/step2a/' +
+        appNumString
+
+      console.log(url)
+
+      if (this.file) {
+        const fd = new FormData()
+        fd.append('validId', this.file)
+        console.log(this.file)
+
+        fd.append('firstName', this.rep.firstName)
+        fd.append('middleName', this.rep.middleName)
+        fd.append('lastName', this.rep.lastName)
+        fd.append('contactNo', this.rep.contactNo)
+        fd.append('relationship', this.rep.relationship)
+        if (this.rep.email) {
+          fd.append('email', this.rep.email)
+        }
+
+        try {
+          await this.$axios.post(url, fd)
+          this.nextStep()
+        } catch (_err) {
+          console.log('Error.')
+          console.log(this.file)
+          console.log(_err)
+        }
+      }
+    },
   },
 })
 </script>
@@ -193,9 +238,6 @@ export default Vue.extend({
   padding-left: 5%;
 }
 
-/* Font links*/
-@import url('https://fonts.googleapis.com/css?family=Inter');
-
 /* Welcome */
 .container {
   position: relative;
@@ -205,11 +247,10 @@ export default Vue.extend({
   position: absolute;
   font-family: 'Inter';
   margin-top: 8%;
-  margin-left: 27%;
+  margin-left: 23%;
   font-style: normal;
   font-weight: 700;
   font-size: 250%;
-  align: center;
   color: #000080;
 }
 
@@ -251,9 +292,17 @@ export default Vue.extend({
   font-size: 140%;
 }
 
+.h3 {
+  font-weight: 400;
+}
+
 .center-btn {
   text-align: center;
   padding-top: 5%;
   padding-bottom: 8%;
+}
+
+.form-input >>> .error--text {
+  color: rgba(255, 0, 0, 1) !important;
 }
 </style>

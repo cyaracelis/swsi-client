@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="welcome">
-      <p>Welcome, New Subscriber!</p>
+      <p>Your application number is {{ appNum }}.</p>
     </div>
 
     <!-- Stepper temp -->
@@ -79,18 +79,33 @@
 <script lang="ts">
 import Vue from 'vue'
 export default Vue.extend({
+  props: {
+    appNum: {
+      type: Number,
+      required: true,
+    },
+  },
   methods: {
     nextStep() {
       this.$emit('schedule-visit')
     },
 
     download(formNum: number) {
+      const appNumUnknown = this.appNum as unknown
+      const appNumString = appNumUnknown as string
+
+      const baseurl =
+        'https://3498-180-190-48-16.ap.ngrok.io/applications/step3-'
+
       if (formNum === 1) {
-        window.open('http://localhost:3000/applications/step3-1/0')
+        const newurl = baseurl + '1/' + appNumString
+        window.open(newurl)
       } else if (formNum === 2) {
-        window.open('http://localhost:3000/applications/step3-2/0')
+        const newurl = baseurl + '2/' + appNumString
+        window.open(newurl)
       } else {
-        window.open('http://localhost:3000/applications/step3-3/0')
+        const newurl = baseurl + '3/' + appNumString
+        window.open(newurl)
       }
     },
   },
@@ -123,9 +138,6 @@ th {
   text-align: center;
 }
 
-/* Font links*/
-@import url('https://fonts.googleapis.com/css?family=Inter');
-
 /* Welcome */
 .container {
   position: relative;
@@ -136,7 +148,7 @@ th {
   position: absolute;
   font-family: 'Inter';
   margin-top: 8%;
-  margin-left: 27%;
+  margin-left: 23%;
   font-style: normal;
   font-weight: 700;
   font-size: 250%;
