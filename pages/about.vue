@@ -2,7 +2,7 @@
   <div>
     <nav-bar />
     <div class="bg-cover">
-      <img class="bg" src="~/assets/img/aboutus-static.svg" />
+      <img class="bg" src="~/assets/img/aboutus-static.png" />
     </div>
   </div>
 </template>

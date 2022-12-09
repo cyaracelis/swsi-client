@@ -4,13 +4,9 @@
       <div class="apply">
         <p class="btn-text">New customer?</p>
         <button class="apply-btn" @click="openApplication">Apply here</button>
-      </div>
-      <div class="login">
-        <p class="btn-text">Have any issues?</p>
-        <button class="complaint-btn">Send a complaint</button>
+        <p class="under-btn-text">More features coming soon. Stay tuned!</p>
       </div>
     </div>
-    <p class="fully-experience">For any other concerns, kindly contact us.</p>
   </div>
 </template>
 
@@ -22,6 +18,14 @@ export default Vue.extend({
       this.$router.push('/application')
     },
   },
+
+  // Comment dump
+  //   <div class="login">
+  //         <p class="btn-text">Have any issues?</p>
+  //         <button class="complaint-btn">Send a complaint</button>
+  //       </div>
+  //     </div>
+  //     <p class="fully-experience">For any other concerns, kindly contact us.</p>
 })
 </script>
 
@@ -57,10 +61,15 @@ button {
 
 .apply {
   margin-top: 15%;
+  margin-bottom: 10%;
 }
 
 .login {
   margin-top: 8%;
+}
+
+.under-btn-text {
+  margin-top: 3%;
 }
 
 .fully-experience {
